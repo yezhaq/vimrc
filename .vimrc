@@ -530,14 +530,6 @@ noremap <leader>s= z=
 "Q don't enter ex mode
 nnoremap Q <nop>
 
-nnoremap <leader>W <esc>:w!<cr>
-nnoremap <leader>w <esc>:w<cr> 
-
-nnoremap <leader>h <esc>:noh<cr>
-nnoremap <leader>q <esc>:q<cr>
-nnoremap <leader>Q <esc>:q!<cr>
-
-
 noremap <silent> <Space>b :BufExplorerHorizontalSplit<CR>
 noremap <silent> b :BufExplorerHorizontalSplit<CR>
 
