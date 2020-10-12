@@ -83,7 +83,6 @@ set hidden              " allows making buffers hidden even with unsaved changes
 set history=1000        " remember more commands and search history
 set undolevels=1000     " use many levels of undo
 set autoread            " auto read when a file is changed from the outside
-"set mouse=a             " enables the mouse in all modes
 "turn off swap file
 set noswapfile
 "auto load modify file
@@ -163,6 +162,18 @@ let g:airline_section_gutter = ''
 let g:airline_section_z = ''
 let g:airline#extensions#whitespace#enabled = 0
 
+autocmd TerminalOpen terminal call TerminalWin_Enter()
+
+function! TerminalWin_Enter()
+    echo "terminal win enter"
+    execute NERDTreeClose
+    execute TagbarClose
+endfunction
+
+function! TerminalWin_Leave()
+    echo "terminal win close"
+endfunction
+
 autocmd BufWinEnter quickfix call QuickfixWinEnter_event()
 
 "quick fix leave, sometimes bug
@@ -208,10 +219,7 @@ let g:Nerdtree_window_leave_width = 40
 
 let NERDTreeDirArrows=0
 
-"map leader key
-let mapleader=","
-
-nmap <leader>r :call Ranger()<cr>
+nnoremap ,h :noh<cr>
 
 noremap <silent> <expr> j (v:count == 0?'gj':'j')
 noremap <silent> <expr> k (v:count == 0?'gk':'k')
@@ -236,21 +244,54 @@ endfunction
 
 
 "move between tabs
-nnoremap w :tabnext <cr>
-nnoremap q :tabprevious <cr>
-nnoremap a :call TabSwitchToPrevTab() <cr>
+if has('nvim')
+    nnoremap <A-w> :tabnext <cr>
+    nnoremap <A-q> :tabprevious <cr>
+    nnoremap <A-a> :call TabSwitchToPrevTab() <cr>
+else
+    nnoremap w :tabnext <cr>
+    nnoremap q :tabprevious <cr>
+    nnoremap a :call TabSwitchToPrevTab() <cr>
+endif
 
 "quick in tmux
 nnoremap <c-d> :q<cr>
 
 "alt key mapping, for my laptop
 "windows jump
-nnoremap l <c-w>l
-nnoremap h <c-w>h
-nnoremap j <c-w>j
-nnoremap k <c-w>k
-"move to previous window
-nnoremap n <c-w>p
+if has('nvim')
+    "normal mode map windows movements
+    nnoremap <A-l> <c-w>l
+    nnoremap <A-h> <c-w>h
+    nnoremap <A-j> <c-w>j
+    nnoremap <A-k> <c-w>k
+    "move to previous window
+    nnoremap <A-n> <c-w>p
+
+    "teminal mode map windows movements
+    tnoremap <A-l> <c-w>l
+    tnoremap <A-h> <c-w>h
+    tnoremap <A-j> <c-w>j
+    tnoremap <A-k> <c-w>k
+    "move to previous window
+    tnoremap <A-n> <c-w>p
+else
+    "normal mode map windows movements
+    nnoremap l <c-w>l
+    nnoremap h <c-w>h
+    nnoremap j <c-w>j
+    nnoremap k <c-w>k
+    "move to previous window
+    nnoremap n <c-w>p
+
+    "teminal mode map windows movements
+    tnoremap l <c-w>l
+    tnoremap h <c-w>h
+    tnoremap j <c-w>j
+    tnoremap k <c-w>k
+    "move to previous window
+    tnoremap n <c-w>p
+endif
 
 "esc key mapping,<c-[> suffers me
 "normal
@@ -316,8 +357,6 @@ let g:NERDTreeAutoDeleteBuffer=1
 hi IndentGuidesOdd  ctermbg=black
 hi IndentGuidesEven ctermbg=darkgrey
 
-command! -nargs=0 Cheader call Gen(0)
-
 "{{{
 "tags settings
 
@@ -325,9 +364,6 @@ command! -nargs=0 Cheader call Gen(0)
 set csprg=gtags-cscope 
 set cscopequickfix=g-,s-,c-,d-,i-,t-,e-
 set cscopetag
-
-"ctag for omnicppcomplete 
-command! -nargs=0 CTAG !ctags -R --languages=Asm,c,c++,java --exclude=.git --exclude=.svn --c++-kinds=+p --fields=+iaS --extra=+q .
 
 "gtag for jump
 command! -nargs=0 GTAG call GenGtag()
@@ -341,8 +377,10 @@ endfunction
 "use tag in current directory
 set tags=tags
 
+"{{{
 nnoremap <silent> <C-l> :call JumpToNextIndentifier()<cr>
 nnoremap <silent> <C-h> :call JumpToPrevIndentifier()<cr>
+"}}}
 
 "{{{
 "vim-line-jump settings
@@ -445,31 +483,49 @@ nnoremap <F8> :call FileDir(0)<cr><c-l>
 
 "{{{
 "terminal settings
+function! TerminalEdit(bufnum, arglist)
+    echo "TerminalEdit"
+    "execute "e " . a:arglist[0]
+    execute "e ~/a.txt"
+endfunction
 
 "some setting to easy terminal using
 "F12 open terminal bash in current window
 nnoremap <F12> :terminal ++curwin ++close bash<cr><c-l>
 "ctrl+^ switch to previous buffer as in normal mode
 tnoremap <c-^> <c-w>:bprevious<cr>
-"alt+b: open buffer explorer
-tnoremap b <c-w>:BufExplorerHorizontalSplit<cr>
-"alt+d: quit terminal window
-tnoremap d <c-w><c-c>
-"tnoremap <c-d> <c-w><c-c><cr>
-"alt+n: terminal go back to normal mode
-tnoremap n <c-w>N
-"alt+p: use to paste content to terminal, the newline will be omit,
-"because it will be change to enter key in the shell, cause unexpected
-"command start running right after paste text
-tnoremap p  <c-w>:call term_sendkeys('%', substitute(getreg(''),'\n','',""))<cr>
-"hi Terminal ctermbg=232 guibg=grey
+if has('nvim')
+    "alt+b: open buffer explorer
+    tnoremap <A+b> <c-w>:BufExplorerHorizontalSplit<cr>
+    "alt+d: quit terminal window
+    tnoremap <A+d> <c-w><c-c>
+    "tnoremap <c-d> <c-w><c-c><cr>
+    "alt+n: terminal go back to normal mode
+    tnoremap <A+n> <c-w>N
+    "alt+p: use to paste content to terminal, the newline will be omit,
+    "because it will be change to enter key in the shell, cause unexpected
+    "command start running right after paste text
+    tnoremap <A+p>  <c-w>:call term_sendkeys('%', substitute(getreg(''),'\n','',""))<cr>
+    "hi Terminal ctermbg=232 guibg=grey
+else
+    "alt+b: open buffer explorer
+    tnoremap b <c-w>:BufExplorerHorizontalSplit<cr>
+    "alt+d: quit terminal window
+    tnoremap d <c-w><c-c>
+    "tnoremap <c-d> <c-w><c-c><cr>
+    "alt+n: terminal go back to normal mode
+    tnoremap n <c-w>N
+    "alt+p: use to paste content to terminal, the newline will be omit,
+    "because it will be change to enter key in the shell, cause unexpected
+    "command start running right after paste text
+    tnoremap p  <c-w>:call term_sendkeys('%', substitute(getreg(''),'\n','',""))<cr>
+    "hi Terminal ctermbg=232 guibg=grey
+endif
 
 
 "autocmd BufEnter * call Terminal_buffer_enter()
 "autocmd BufLeave * call Terminal_buffer_leave()
 au BufWinEnter * if &buftype == 'terminal' | setlocal bufhidden=hide | endif
-
-
 "}}}
 
 "File filename
@@ -479,7 +535,6 @@ command! -nargs=? -complete=file Dir call FileDir(0,<f-args>)
 
 "CommandT!!!  I love it
 noremap <silent> <F9> <ESC>:CommandT<CR>
-
 
 "map command line like shell
 cnoremap <C-a>  <Home>
@@ -540,12 +595,6 @@ nnoremap <leader>cj O/**/<ESC>0f*a
 
 "{{{
 "CommandT, I love it...
-
-"command-t default start path
-"command-t compile:
-"    cd .vim/bundle/Command-T/ruby/command-t/
-"    ruby extconf.rb
-"    make
 "command-t use vim wildignore to determine which file should be excluded
 set wildignore=*.o,*.obj,.git,.svn,*.pyc*,*.d
 let g:CommandTTraverseSCM="pwd"
