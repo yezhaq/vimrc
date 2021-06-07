@@ -65,6 +65,9 @@ call vundle#end()            " required
 syntax enable
 filetype plugin indent on
 
+let &t_TI = ""
+let &t_TE = ""
+
 set title
 set matchpairs+=":"
 set clipboard=unnamed
@@ -253,10 +256,18 @@ if has('nvim')
     nnoremap <A-w> :tabnext <cr>
     nnoremap <A-q> :tabprevious <cr>
     nnoremap <A-a> :call TabSwitchToPrevTab() <cr>
+
+    tnoremap w <c-w>:tabnext <cr>
+    tnoremap q <c-w>:tabprevious <cr>
+    tnoremap a <c-w>:call TabSwitchToPrevTab() <cr>
 else
     nnoremap w :tabnext <cr>
     nnoremap q :tabprevious <cr>
     nnoremap a :call TabSwitchToPrevTab() <cr>
+
+    tnoremap w <c-w>:tabnext <cr>
+    tnoremap q <c-w>:tabprevious <cr>
+    tnoremap a <c-w>:call TabSwitchToPrevTab() <cr>
 endif
 
 "quick in tmux
